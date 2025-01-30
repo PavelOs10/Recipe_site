@@ -4,8 +4,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'ваш-ключ'
-DEBUG = True  # В production поменяйте на False
-ALLOWED_HOSTS = ['*']  # Или нужные домены/IP
+DEBUG = False
+ALLOWED_HOSTS = ['212.193.1.156']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -14,7 +14,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'recipes',  # Регистрация нашего приложения
+    'recipes',
 ]
 
 MIDDLEWARE = [
@@ -31,7 +31,7 @@ ROOT_URLCONF = 'recipe_site.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],  # при необходимости можно указать общую папку шаблонов
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -46,7 +46,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'recipe_site.wsgi.application'
 
-# Подключение БД (пример — SQLite)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -58,4 +57,5 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'static'
 STATICFILES_DIRS = [BASE_DIR / 'recipes' / 'static']
