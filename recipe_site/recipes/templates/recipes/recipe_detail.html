@@ -1,0 +1,28 @@
+{% extends "recipes/base.html" %}
+{% load static %}
+
+{% block title %}
+{{ recipe.title }}
+{% endblock %}
+
+{% block content %}
+  <h1 class="mb-3">{{ recipe.title }}</h1>
+  <p><strong>Автор:</strong> {{ recipe.author.username }}</p>
+  <p><strong>Время приготовления:</strong> {{ recipe.cooking_time }} минут</p>
+
+  {% if recipe.image %}
+    <img src="{{ recipe.image.url }}" class="img-fluid my-3" alt="{{ recipe.title }}">
+  {% else %}
+    <img src="{% static 'recipes/no_image.jpg' %}" class="img-fluid my-3" alt="Нет картинки">
+  {% endif %}
+
+  <h3>Описание</h3>
+  <p>{{ recipe.description|linebreaks }}</p>
+
+  <h3>Шаги приготовления</h3>
+  <p>{{ recipe.steps|linebreaks }}</p>
+
+  {% if user == recipe.author %}
+    <a href="{% url 'edit_recipe' recipe.pk %}" class="btn btn-warning">Редактировать</a>
+  {% endif %}
+{% endblock %}
