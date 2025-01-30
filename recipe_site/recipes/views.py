@@ -3,9 +3,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
+from django.db.models import Q
 
 from .models import Recipe
-from .forms import RecipeForm, CustomUserCreationForm
+from .forms import RecipeForm, CustomUserCreationForm, CommentForm
 
 
 def index(request):
@@ -13,9 +14,44 @@ def index(request):
     return render(request, 'recipes/index.html', {'recipes': recipes})
 
 
+def recipe_list(request):
+    """Отображает все рецепты + поиск по названию/описанию."""
+    query = request.GET.get('q', '')
+    recipes = Recipe.objects.all()
+    if query:
+        recipes = recipes.filter(Q(title__icontains=query) | Q(description__icontains=query))
+
+    return render(request, 'recipes/recipe_list.html', {
+        'recipes': recipes,
+        'query': query,
+    })
+
+
 def recipe_detail(request, pk):
+    """Детальный просмотр рецепта + вывод/добавление комментариев."""
     recipe = get_object_or_404(Recipe, pk=pk)
-    return render(request, 'recipes/recipe_detail.html', {'recipe': recipe})
+    comments = recipe.comments.order_by('-created_at')
+
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            messages.error(request, "Вы должны быть авторизованы, чтобы оставлять комментарии.")
+            return redirect('recipe_detail', pk=recipe.pk)
+
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            new_comment = form.save(commit=False)
+            new_comment.recipe = recipe
+            new_comment.author = request.user
+            new_comment.save()
+            return redirect('recipe_detail', pk=recipe.pk)
+    else:
+        form = CommentForm()
+
+    return render(request, 'recipes/recipe_detail.html', {
+        'recipe': recipe,
+        'comments': comments,
+        'form': form
+    })
 
 
 @login_required
@@ -26,6 +62,7 @@ def add_recipe(request):
             new_recipe = form.save(commit=False)
             new_recipe.author = request.user
             new_recipe.save()
+            form.save_m2m()
             return redirect('recipe_detail', pk=new_recipe.pk)
     else:
         form = RecipeForm()
